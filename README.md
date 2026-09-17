@@ -150,6 +150,20 @@ Run `codex` and open `/hooks`, review and trust its two lifecycle hooks, and sta
 
 This same install also covers the Codex desktop app: restart the app after installing and it picks up the plugin.
 
+### Amp
+
+Clone Ponytail and copy its self-contained directory plugin into Amp's system plugin directory:
+
+```bash
+git clone https://github.com/DietrichGebert/ponytail
+mkdir -p ~/.config/amp/plugins
+cp -R ponytail/.amp/plugins/ponytail ~/.config/amp/plugins/
+```
+
+On Windows, the destination is `%USERPROFILE%\.config\amp\plugins\ponytail`. For one project only, copy it to that project's `.amp/plugins/ponytail` instead. Reload plugins from Amp's command palette after installing.
+
+The plugin injects the active `lite`, `full`, or `ultra` ruleset on every turn, keeps mode changes isolated per thread, and registers all six skills as `ponytail:ponytail`, `ponytail:ponytail-review`, and so on. Use **Ponytail: Set Mode** in the command palette or send `/ponytail lite|full|ultra|off` as a message. Without the plugin, Amp still reads this repo's `AGENTS.md` as the instruction-only fallback.
+
 ### GitHub Copilot CLI
 
 ```bash
@@ -318,6 +332,7 @@ Which files map to which agent: [Agent portability](docs/agent-portability.md).
 |------|---------|
 | Claude Code | `/plugin remove ponytail` |
 | Codex | `codex plugin remove ponytail` |
+| Amp | Delete `ponytail` from the Amp system or project plugin directory, then reload plugins |
 | Devin CLI | `devin plugins remove ponytail` |
 | Grok Build | `grok plugin uninstall ponytail` |
 | Pi agent | `pi uninstall ponytail` |
@@ -337,7 +352,7 @@ These remove the plugin's own files. They leave behind a small amount of state p
 | `/ponytail-gain` | Show the measured impact scoreboard (less code, less cost, more speed) from the benchmark. |
 | `/ponytail-help` | Quick reference for the commands above. |
 
-Commands need a skill-capable host (Claude Code, Codex, Devin CLI, OpenCode, Gemini, pi, Swival, Hermes Agent, Qoder, Grok Build). In Codex they're skills, invoke with `@` (`@ponytail-review`). Cursor with the [hooks](#cursor) gets `/ponytail` level switching only, typed as a plain message. The instruction-only adapters (Cursor's rule file, Windsurf, Cline, Copilot, Kiro, Antigravity) load the always-on ruleset without the commands.
+Commands need a skill-capable host (Claude Code, Codex, Amp, Devin CLI, OpenCode, Gemini, pi, Swival, Hermes Agent, Qoder, Grok Build). In Codex they're skills, invoke with `@` (`@ponytail-review`). In Amp, use the qualified skill names (`ponytail:ponytail-review`) and **Ponytail: Set Mode** in the command palette. Cursor with the [hooks](#cursor) gets `/ponytail` level switching only, typed as a plain message. The instruction-only adapters (Cursor's rule file, Windsurf, Cline, Copilot, Kiro, Antigravity) load the always-on ruleset without the commands.
 
 ## Development
 
@@ -348,7 +363,7 @@ node scripts/check-rule-copies.js
 npm test
 ```
 
-The OpenClaw skill package (`.openclaw/skills/`) is generated from `skills/`; rerun `node scripts/build-openclaw-skills.js` after changing a skill, the test suite fails if it is stale. To publish the skills to ClawHub, run `clawhub login` once, then `node scripts/publish-openclaw-skills.js` (it publishes all six at the `package.json` version; pass `--dry-run` to preview).
+The OpenClaw skill package (`.openclaw/skills/`) is generated from `skills/`; rerun `node scripts/build-openclaw-skills.js` after changing a skill. The Amp plugin bundle is generated from `skills/` plus the shared runtime helpers; rerun `node scripts/build-amp-plugin.js` after changing either. The test suite fails if either committed bundle is stale. To publish the skills to ClawHub, run `clawhub login` once, then `node scripts/publish-openclaw-skills.js` (it publishes all six at the `package.json` version; pass `--dry-run` to preview).
 
 The correctness benchmark spawns Python for email and CSV checks; `python3` is tried before `python`. CSV checks need `pandas` installed locally.
 
